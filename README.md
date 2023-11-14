@@ -1,1 +1,1 @@
-# Solution files for hw2
+An Remove row button has been added. This button is disabled when no row (or the total cost row) is selected. When a valid row is selected in the table, the button is enabled. When clicked, the button removes the row from the table and disables the button (as no row is now selected). When a row is removed, the total cost is recomputed and updated in the table to reflect the change.

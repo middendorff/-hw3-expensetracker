@@ -27,6 +27,10 @@ public class ExpenseTrackerView extends JFrame {
   private JTextField amountFilterField;
   private JButton amountFilterBtn;
 
+  private JButton undoButton;
+
+  private int selectedRow;
+
   
 
   public ExpenseTrackerView() {
@@ -61,6 +65,11 @@ public class ExpenseTrackerView extends JFrame {
     JLabel amountFilterLabel = new JLabel("Filter by Amount:");
     amountFilterField = new JTextField(10);
     amountFilterBtn = new JButton("Filter by Amount");
+
+
+
+    undoButton = new JButton("Remove");
+    undoButton.setEnabled(false);
   
 
   
@@ -75,6 +84,7 @@ public class ExpenseTrackerView extends JFrame {
     JPanel buttonPanel = new JPanel();
     buttonPanel.add(amountFilterBtn);
     buttonPanel.add(categoryFilterBtn);
+    buttonPanel.add(undoButton);
   
     // Add panels to frame
     add(inputPanel, BorderLayout.NORTH);
@@ -126,7 +136,7 @@ public class ExpenseTrackerView extends JFrame {
 
   public String getCategoryFilterInput() {
     return JOptionPane.showInputDialog(this, "Enter Category Filter:");
-}
+  }
 
 
   public void addApplyAmountFilterListener(ActionListener listener) {
@@ -142,6 +152,20 @@ public class ExpenseTrackerView extends JFrame {
         // You can show an error message or return a default value
         return 0.0; // Default value (or any other appropriate value)
     }
+  }
+
+  public void addUndoButtonListener(ActionListener listener) {
+    this.undoButton.addActionListener(listener);
+  }
+
+  // public 
+
+  public boolean getUndoButtonEnabled() {
+    return undoButton.isEnabled();
+  }
+
+  public void setUndoButtonEnabled(boolean enabled) {
+    undoButton.setEnabled(enabled);
   }
 
   public void refreshTable(List<Transaction> transactions) {
@@ -171,6 +195,16 @@ public class ExpenseTrackerView extends JFrame {
 
   public JButton getAddTransactionBtn() {
     return addTransactionBtn;
+  }
+  public JButton getUndoButton() {
+    return undoButton;
+  }
+
+  public int getSelectedRow() {
+    return selectedRow;
+  }
+  public void setSelectedRow(int row) {
+    this.selectedRow = row;
   }
 
 

@@ -1,6 +1,10 @@
 import javax.swing.JOptionPane;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+
 import controller.ExpenseTrackerController;
 import model.ExpenseTrackerModel;
+import model.Transaction;
 import view.ExpenseTrackerView;
 import model.Filter.AmountFilter;
 import model.Filter.CategoryFilter;
@@ -20,6 +24,17 @@ public class ExpenseTrackerApp {
 
     // Initialize view
     view.setVisible(true);
+
+    view.getUndoButton().addActionListener(e -> {
+      if (view.getUndoButtonEnabled()) {
+        // Get transaction data from view
+        int rowToRemove = view.getSelectedRow();
+        //Call controller to remove row
+        controller.removeTransaction(rowToRemove);
+        view.setUndoButtonEnabled(false);
+      }
+    });
+
 
 
 
@@ -48,10 +63,10 @@ public class ExpenseTrackerApp {
           controller.setFilter(categoryFilter);
           controller.applyFilter();
       }
-     }catch(IllegalArgumentException exception) {
+    }catch(IllegalArgumentException exception) {
     JOptionPane.showMessageDialog(view, exception.getMessage());
     view.toFront();
-   }});
+  }});
 
 
     // Add action listener to the "Apply Amount Filter" button
@@ -66,8 +81,27 @@ public class ExpenseTrackerApp {
     }catch(IllegalArgumentException exception) {
     JOptionPane.showMessageDialog(view,exception.getMessage());
     view.toFront();
-   }});
+  }});
     
+  view.getTransactionsTable().getSelectionModel().addListSelectionListener(new ListSelectionListener(){
+    public void valueChanged(ListSelectionEvent event) {
 
+      if (!event.getValueIsAdjusting() ) { //only trigger once
+
+        int row  = view.getTransactionsTable().getSelectedRow();
+        int length = view.getTransactionsTable().getRowCount();
+
+        if ( row == -1 || row == length-1) {//dont delete last row with totals
+          view.setUndoButtonEnabled(false);
+          view.setSelectedRow(row);
+        }
+        else {
+
+          view.setUndoButtonEnabled(true);
+          view.setSelectedRow(row);
+        }
+      }
+    }
+});
   }
 }

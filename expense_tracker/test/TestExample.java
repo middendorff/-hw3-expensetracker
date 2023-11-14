@@ -5,6 +5,10 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
 import java.util.List;
+
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+
 import java.text.ParseException;
 
 import org.junit.Before;
@@ -22,16 +26,50 @@ import model.Filter.CategoryFilter;
 
 public class TestExample {
   
-  private ExpenseTrackerModel model;
-  private ExpenseTrackerView view;
-  private ExpenseTrackerController controller;
+    private ExpenseTrackerModel model;
+    private ExpenseTrackerView view;
+    private ExpenseTrackerController controller;
 
-  @Before
-  public void setup() {
-    model = new ExpenseTrackerModel();
-    view = new ExpenseTrackerView();
-    controller = new ExpenseTrackerController(model, view);
-  }
+    @Before
+    public void setup() {
+        model = new ExpenseTrackerModel();
+        view = new ExpenseTrackerView();
+        controller = new ExpenseTrackerController(model, view);
+
+        //add listeners
+
+        view.getUndoButton().addActionListener(e -> {
+            if (view.getUndoButtonEnabled()) {
+                // Get transaction data from view
+                int rowToRemove = view.getSelectedRow();
+                //Call controller to remove row
+                controller.removeTransaction(rowToRemove);
+                view.setUndoButtonEnabled(false);
+            }
+        });
+
+        view.getTransactionsTable().getSelectionModel().addListSelectionListener(new ListSelectionListener(){
+            public void valueChanged(ListSelectionEvent event) {
+
+                if (!event.getValueIsAdjusting() ) { //only trigger once
+
+                    int row  = view.getTransactionsTable().getSelectedRow();
+                    int length = view.getTransactionsTable().getRowCount();
+
+                    if ( row == -1 || row == length-1) {//dont delete last row with totals
+                    view.setUndoButtonEnabled(false);
+                    view.setSelectedRow(row);
+
+                    }
+                    else {
+
+                    view.setUndoButtonEnabled(true);
+                    view.setSelectedRow(row);
+                    }
+                }
+            }
+        });
+    }
 
     public double getTotalCost() {
         double totalCost = 0.0;
@@ -113,6 +151,8 @@ public class TestExample {
         assertEquals(0.00, totalCost, 0.01);
     }
 
+
+
     //test1
     @Test
     public void testAddTransactionWithView(){
@@ -137,7 +177,7 @@ public class TestExample {
 
     //test2
     @Test
-    public void invalidInputHandling(){
+    public void testInvalidInputHandling(){
         //pre-condition: total cost is initially zero
         assertEquals(0.0, getTotalCost(), 0.01);
         //precondition: list of transactions is empty
@@ -183,7 +223,7 @@ public class TestExample {
 
     //test3
     @Test
-    public void filterByAmount(){
+    public void testFilterByAmount(){
         //precondition : list of transactions is empty
         assertEquals(0, model.getTransactions().size());
 
@@ -212,7 +252,8 @@ public class TestExample {
     }
 
     //test4
-    public void filterByCategory(){
+    @Test
+    public void testFilterByCategory(){
         //precondition : list of transactions is empty
         assertEquals(0, model.getTransactions().size());
 
@@ -234,7 +275,73 @@ public class TestExample {
 
         //postcondition: verify that only the targetted transaction was returned
         assertEquals(1, filteredTransactions.size());
-        assertEquals(category1, filteredTransactions.get(0).getCategory());
+        assertEquals(category2, filteredTransactions.get(0).getCategory());
+    }
+    
+    //test5
+    @Test
+    public void testRemoveTransactionDisallowed() {
+        // Pre-condition: List of transactions is empty
+        assertEquals(0, view.getTransactionsTable().getRowCount());
+    
+	    // Perform the action: Test to ensure the button is disabled when the list of transactions is empty
+        assertEquals(view.getUndoButtonEnabled(), false);
+    
+        // Post-condition: List of transactions is empty
+        assertEquals(0, view.getTransactionsTable().getRowCount());
+    
+    }
+    //Text6
+    @Test
+    public void testRemoveTransactionAllowed() {
+        // Pre-condition: List of transactions is empty
+        assertEquals(0, view.getTransactionsTable().getRowCount());
+    
+        //perform the action: add a transaction with amount 50.00 and category "food"
+        double amount = 50.00;
+        String category = "food";
+        assertTrue(controller.addTransaction(amount, category));
+    
+        // Pre-condition: List of transactions contains only
+	    //                the added transaction
+        //check the contents of the list, making sure amount and category are displayed correctly
+        assertEquals(amount, view.getTransactionsTable().getValueAt(0,1));
+        assertEquals(category, view.getTransactionsTable().getValueAt(0,2));
+
+        //post-condition: the total cost is at the total row is equal to the only added transaction
+        assertEquals(amount,view.getTransactionsTable().getValueAt(1,3));
+
+
+	
+        // Precondition: Test to ensure the button is disabled when no row selected
+        assertEquals(false, view.getUndoButtonEnabled());
+        
+
+        //Perform the action: select a row 0
+        view.getTransactionsTable().setRowSelectionInterval(0, 0);
+
+        // Perform the test: row is selected and button is enabled
+        assertEquals(0, view.getSelectedRow());
+        assertEquals(true, view.getUndoButtonEnabled());
+
+        //Perform the action: remove the selected row
+        view.getUndoButton().doClick();
+
+        //Post-condition: no selected rows 
+        assertEquals(-1, view.getSelectedRow());
+        // Precondition: Test to ensure the button is disabled after row deletion
+        assertEquals(false, view.getUndoButtonEnabled());
+
+
+    
+        // Post-condition: List of transactions contains only to total cost row
+        assertEquals(1, view.getTableModel().getRowCount());
+    
+        // Check the total cost after removing the transaction
+
+        //post-condition: the total cost is at the total row is equal to 0
+        assertEquals(0.0,view.getTransactionsTable().getValueAt(0,3));
+
     }
 
 
