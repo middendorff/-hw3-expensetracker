@@ -112,5 +112,24 @@ public class TestExample {
         double totalCost = getTotalCost();
         assertEquals(0.00, totalCost, 0.01);
     }
+
+
+
+    @Test
+    public void testRemoveTransactionDisallowed() {
+        // Pre-condition: List of transactions is empty
+        assertEquals(0, model.getTransactions().size());
+    
+	    // Perform the action: Test to ensure the button is disabled when the list of transactions is empty
+        assertEquals(view.getUndoButtonEnabled(), false);
+    
+        // Post-condition: List of transactions is empty
+        List<Transaction> transactions = model.getTransactions();
+        assertEquals(0, transactions.size());
+    
+        // Check the total cost after removing the transaction
+        double totalCost = getTotalCost();
+        assertEquals(0.00, totalCost, 0.01);
+    }
     
 }
