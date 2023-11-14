@@ -93,8 +93,10 @@ public class ExpenseTrackerApp {
 
         if ( row == -1 || row == length-1) {//dont delete last row with totals
           view.setUndoButtonEnabled(false);
+          view.setSelectedRow(row);
         }
         else {
+
           view.setUndoButtonEnabled(true);
           view.setSelectedRow(row);
         }

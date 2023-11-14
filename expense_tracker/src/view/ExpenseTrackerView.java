@@ -155,7 +155,7 @@ public class ExpenseTrackerView extends JFrame {
   }
 
   public void addUndoButtonListener(ActionListener listener) {
-    undoButton.addActionListener(listener);
+    this.undoButton.addActionListener(listener);
   }
 
   // public 
